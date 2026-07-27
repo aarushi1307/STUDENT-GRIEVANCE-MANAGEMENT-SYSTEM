@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GBU Grievance &amp; Ticket Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  
+  :root{
+    --bg:#0e1420;
+    --surface:#161f30;
+    --surface-2:#1c2740;
+    --border:#283354;
+    --text:#e8ecf5;
+    --text-dim:#8b95ab;
+    --gold:#d4a24e;
+    --gold-soft:rgba(212,162,78,.14);
+    --amber:#f0a93c;
+    --blue:#4f8ff0;
+    --green:#3ecf8e;
+    --red:#f26d6d;
+    --radius:14px;
+    --shadow:0 20px 50px -20px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(212,162,78,.07), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(79,143,240,.05), transparent 60%),
+      var(--bg);
+    min-height:100vh;
+    font-family:'Inter', sans-serif;
+    color:var(--text);
+  }
+  h1,h2,h3,.eyebrow{ font-family:'Sora', sans-serif; }
+  .hidden{ display:none !important; }
+ 
+  
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:20px 32px; border-bottom:1px solid var(--border);
+    background:rgba(22,31,48,.6); backdrop-filter:blur(8px);
+    position:sticky; top:0; z-index:10;
+  }
+  .topbar .lockup{ display:flex; align-items:center; gap:12px; }
+  .topbar .mark{
+    width:36px; height:36px; border-radius:9px;
+    background:linear-gradient(155deg, var(--gold), #a8783a);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Sora', sans-serif; font-weight:700; font-size:14px; color:#171006;
+  }
+  .topbar h1{ font-size:16px; font-weight:600; }
+  .topbar .sub{ font-size:12px; color:var(--text-dim); }
+  .logout{
+    font-family:'Sora', sans-serif; font-size:12.5px; font-weight:600;
+    color:var(--text-dim); background:none; cursor:pointer;
+    border:1px solid var(--border); padding:8px 14px; border-radius:8px;
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .logout:hover{ color:var(--gold); border-color:var(--gold); }
+ 
+  .wrap{ max-width:1080px; margin:0 auto; padding:36px 24px 60px; }
+ 
+  .heading{ margin-bottom:26px; }
+  .heading .eyebrow{
+    font-size:11px; font-weight:600; letter-spacing:1.6px; text-transform:uppercase;
+    color:var(--gold); display:flex; align-items:center; gap:8px; margin-bottom:8px;
+  }
+  .heading .eyebrow::before{ content:""; width:14px; height:1px; background:var(--gold); }
+  .heading h2{ font-size:26px; font-weight:600; margin-bottom:6px; }
+  .heading p{ font-size:13.5px; color:var(--text-dim); }
+  .heading b{ color:var(--text); }
+ 
+  .card{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); box-shadow:var(--shadow); padding:28px;
+  }
+  .card h3{ font-size:17px; font-weight:600; margin-bottom:4px; }
+  .card .card-sub{ font-size:13px; color:var(--text-dim); margin-bottom:22px; }
+ 
+  form{ display:flex; flex-direction:column; gap:16px; }
+  label{ font-size:12.5px; font-weight:500; color:var(--text-dim); display:block; margin-bottom:7px; }
+  input, select, textarea{
+    width:100%; background:var(--surface-2); border:1px solid var(--border);
+    color:var(--text); font-family:'Inter', sans-serif; font-size:14px;
+    padding:11px 13px; border-radius:9px; outline:none; resize:vertical;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  input::placeholder, textarea::placeholder{ color:#5b6580; }
+  input:focus, select:focus, textarea:focus{ border-color:var(--gold); box-shadow:0 0 0 3px var(--gold-soft); }
+  select{ cursor:pointer; }
+ 
+  .btn{
+    appearance:none; border:none; cursor:pointer;
+    background:linear-gradient(155deg, var(--gold), #b9863f);
+    color:#171006; font-family:'Sora', sans-serif; font-weight:700; font-size:14px;
+    padding:13px 16px; border-radius:9px; align-self:flex-start;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:hover{ transform:translateY(-1px); box-shadow:0 10px 24px -10px rgba(212,162,78,.55); }
+  .btn-outline{
+    appearance:none; cursor:pointer; background:transparent;
+    border:1px solid var(--border); color:var(--text);
+    font-family:'Sora', sans-serif; font-weight:600; font-size:13.5px;
+    padding:11px 15px; border-radius:9px;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .btn-outline:hover{ border-color:var(--gold); color:var(--gold); }
+  .btn-small{
+    appearance:none; cursor:pointer; background:var(--gold);
+    border:none; color:#171006; font-family:'Sora', sans-serif; font-weight:700;
+    font-size:12.5px; padding:9px 13px; border-radius:8px;
+    transition:transform .12s ease;
+  }
+  .btn-small:hover{ transform:translateY(-1px); }
+ 
+  .error-msg{
+    font-size:12.5px; color:#ff8080; background:rgba(255,90,90,.08);
+    border:1px solid rgba(255,90,90,.25); border-radius:8px; padding:9px 12px; display:none;
+  }
+  .error-msg.show{ display:block; }
+ 
+
+  .badge{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:'Sora', sans-serif; font-size:11.5px; font-weight:600;
+    padding:5px 11px; border-radius:100px; letter-spacing:.3px; white-space:nowrap;
+  }
+  .badge::before{ content:""; width:6px; height:6px; border-radius:50%; }
+  .badge.pending{ background:rgba(240,169,60,.12); color:var(--amber); }
+  .badge.pending::before{ background:var(--amber); }
+  .badge.progress{ background:rgba(79,143,240,.12); color:var(--blue); }
+  .badge.progress::before{ background:var(--blue); }
+  .badge.resolved{ background:rgba(62,207,142,.12); color:var(--green); }
+  .badge.resolved::before{ background:var(--green); }
+
+  .pbadge{
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:'Sora', sans-serif; font-size:11px; font-weight:600;
+    padding:4px 10px; border-radius:100px; letter-spacing:.3px; white-space:nowrap;
+    border:1px solid var(--border); color:var(--text-dim);
+  }
+  .pbadge.high{ color:var(--red); border-color:rgba(242,109,109,.35); background:rgba(242,109,109,.08); }
+  .pbadge.medium{ color:var(--amber); border-color:rgba(240,169,60,.35); background:rgba(240,169,60,.08); }
+  .pbadge.low{ color:var(--text-dim); }
+ 
+  .toast{
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--surface-2); border:1px solid var(--green); color:var(--text);
+    padding:13px 20px; border-radius:10px; font-size:13.5px;
+    display:flex; align-items:center; gap:10px;
+    box-shadow:0 14px 30px -10px rgba(0,0,0,.6);
+    opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
+    z-index:50; max-width:90vw;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  .toast .dot{ width:8px; height:8px; border-radius:50%; background:var(--green); flex:none; }
+ 
+
+  #page-login{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:28px;
+  }
+  .login-inner{ width:100%; max-width:400px; }
+  .brand{ display:flex; flex-direction:column; align-items:center; gap:6px; margin-bottom:28px; text-align:center; }
+  .brand .mark{
+    width:46px; height:46px; border-radius:10px;
+    background:linear-gradient(155deg, var(--gold), #a8783a);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Sora', sans-serif; font-weight:700; font-size:18px; color:#171006;
+    box-shadow:0 8px 20px -6px rgba(212,162,78,.5); margin-bottom:8px;
+  }
+  .brand h1{ font-size:20px; font-weight:600; letter-spacing:.2px; }
+  .brand p{ font-size:13px; color:var(--text-dim); }
+ 
+  .stub{
+    position:relative; width:100%;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;
+  }
+  .toggle{
+    display:grid; grid-template-columns:1fr 1fr;
+    background:var(--surface-2); border-bottom:1px dashed var(--border);
+  }
+  .toggle button{
+    appearance:none; border:none; cursor:pointer; background:transparent;
+    font-family:'Sora', sans-serif; font-size:13.5px; font-weight:600; letter-spacing:.3px;
+    color:var(--text-dim); padding:16px 10px;
+    transition:color .2s ease, background .2s ease;
+  }
+  .toggle button.active{ color:var(--gold); background:var(--surface); }
+  .toggle button:not(.active):hover{ color:var(--text); }
+  .stub::before, .stub::after{
+    content:""; position:absolute; width:22px; height:22px; border-radius:50%;
+    background:var(--bg); top:64px;
+  }
+  .stub::before{ left:-11px; }
+  .stub::after{ right:-11px; }
+ 
+  .panel{ padding:30px 28px 28px; }
+  .panel .eyebrow{
+    font-size:11px; font-weight:600; letter-spacing:1.6px; text-transform:uppercase;
+    color:var(--gold); display:flex; align-items:center; gap:8px; margin-bottom:6px;
+  }
+  .panel .eyebrow::before{ content:""; width:14px; height:1px; background:var(--gold); }
+  .panel h2{ font-size:19px; font-weight:600; margin-bottom:4px; }
+  .panel .sub{ font-size:13px; color:var(--text-dim); margin-bottom:22px; }
+  .form-view{ display:none; }
+  .form-view.active{ display:flex; flex-direction:column; gap:16px; }
+  .submit-btn{
+    appearance:none; border:none; cursor:pointer;
+    background:linear-gradient(155deg, var(--gold), #b9863f);
+    color:#171006; font-family:'Sora', sans-serif; font-weight:700; font-size:14px; letter-spacing:.2px;
+    padding:13px 16px; border-radius:9px; margin-top:4px;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .submit-btn:hover{ transform:translateY(-1px); box-shadow:0 10px 24px -10px rgba(212,162,78,.55); }
+  .foot-note{ text-align:center; font-size:11.5px; color:var(--text-dim); margin-top:20px; letter-spacing:.2px; }
+  .foot-note b{ color:var(--gold); font-weight:600; }
+ 
+  
+  .grid{ display:grid; grid-template-columns:1fr; gap:24px; }
+ 
+  .ticket-stub{
+    display:none; position:relative; margin-top:22px;
+    background:var(--surface-2); border:1px dashed var(--gold); border-radius:11px;
+    padding:18px 20px; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  }
+  .ticket-stub.show{ display:flex; }
+  .ticket-stub::before, .ticket-stub::after{
+    content:""; position:absolute; width:16px; height:16px; border-radius:50%;
+    background:var(--surface); top:50%; transform:translateY(-50%);
+  }
+  .ticket-stub::before{ left:-8px; }
+  .ticket-stub::after{ right:-8px; }
+  .ticket-stub .label{ font-size:11px; color:var(--text-dim); letter-spacing:.5px; text-transform:uppercase; margin-bottom:4px; }
+  .ticket-stub .id{ font-family:'JetBrains Mono', monospace; font-size:19px; font-weight:600; color:var(--gold); letter-spacing:.5px; }
+  .ticket-stub .note{ font-size:12.5px; color:var(--text-dim); max-width:220px; }
+ 
+  
+  .stepper{ display:flex; align-items:flex-start; margin-top:18px; padding:0 2px; }
+  .step{ flex:1; display:flex; flex-direction:column; align-items:center; text-align:center; position:relative; min-width:0; }
+  .step .node{
+    width:24px; height:24px; border-radius:50%;
+    background:var(--surface-2); border:2px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Sora', sans-serif; font-size:11px; font-weight:700; color:var(--text-dim);
+    z-index:2; transition:all .25s ease; flex:none;
+  }
+  
+  .step .line{
+    position:absolute; top:12px; left:-50%; right:50%;
+    height:2px; background:var(--border); z-index:1;
+  }
+  .step:first-child .line{ display:none; }
+  .step .name{ margin-top:8px; font-size:11.5px; font-weight:600; color:var(--text-dim); word-break:break-word; }
+  .step.done .node{ background:var(--gold); border-color:var(--gold); color:#171006; }
+  .step.done .line{ background:var(--gold); }
+  .step.done .name{ color:var(--text); }
+  .step.current .node{ background:var(--surface); border-color:var(--gold); color:var(--gold); box-shadow:0 0 0 4px var(--gold-soft); }
+  .step.current .name{ color:var(--gold); }
+ 
+  .g-list{ display:flex; flex-direction:column; gap:14px; }
+  .g-item{ background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:18px 20px; }
+  .g-item .row1{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
+  .g-item .id{ font-family:'JetBrains Mono', monospace; color:var(--gold); font-weight:600; font-size:12.5px; }
+  .g-item .topic{ font-size:14.5px; font-weight:600; margin-top:2px; }
+  .g-item .meta{ font-size:12px; color:var(--text-dim); margin-top:2px; }
+  .g-item .badges{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .g-item .remark-box{
+    margin-top:14px; padding:12px 14px; background:var(--surface); border:1px solid var(--border);
+    border-left:3px solid var(--gold); border-radius:8px; font-size:12.5px; color:var(--text);
+  }
+  .g-item .remark-box .rlabel{ font-size:10.5px; color:var(--gold); text-transform:uppercase; letter-spacing:.6px; font-weight:600; margin-bottom:5px; }
+ 
+  .empty-state{ text-align:center; padding:40px 20px; color:var(--text-dim); }
+  .empty-state .big{ font-size:15px; font-weight:600; color:var(--text); margin-bottom:6px; font-family:'Sora',sans-serif; }
+  .empty-state .small{ font-size:13px; }
+ 
+  
+  .stats{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:24px; }
+  .stat{ background:var(--surface); border:1px solid var(--border); border-radius:11px; padding:14px 18px; min-width:120px; flex:1; }
+  .stat .num{ font-family:'Sora', sans-serif; font-size:22px; font-weight:700; }
+  .stat .lbl{ font-size:11.5px; color:var(--text-dim); margin-top:2px; letter-spacing:.2px; }
+  .stat.pending .num{ color:var(--amber); }
+  .stat.progress .num{ color:var(--blue); }
+  .stat.resolved .num{ color:var(--green); }
+  .stat.high .num{ color:var(--red); }
+ 
+  .toolbar{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:18px; }
+  .search-box{ position:relative; flex:1; min-width:220px; }
+  .search-box input{ padding-left:36px; }
+  .search-box svg{ position:absolute; left:12px; top:50%; transform:translateY(-50%); width:15px; height:15px; opacity:.5; }
+  .sort-btn{
+    appearance:none; cursor:pointer; background:var(--surface);
+    border:1px solid var(--border); color:var(--text);
+    font-family:'Sora', sans-serif; font-weight:600; font-size:13px;
+    padding:11px 16px; border-radius:9px; white-space:nowrap;
+    display:flex; align-items:center; gap:7px;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .sort-btn:hover{ border-color:var(--gold); color:var(--gold); }
+  .sort-btn svg{ width:13px; height:13px; transition:transform .2s ease; }
+  .sort-btn.desc svg{ transform:rotate(180deg); }
+  .filter-select{
+    background:var(--surface); border:1px solid var(--border); color:var(--text);
+    font-family:'Sora', sans-serif; font-weight:600; font-size:13px;
+    padding:11px 14px; border-radius:9px; cursor:pointer; outline:none;
+  }
+ 
+  .table-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+  table{ width:100%; border-collapse:collapse; table-layout:fixed; }
+  thead th{
+    text-align:left; font-family:'Sora', sans-serif; font-size:11px; font-weight:600;
+    letter-spacing:.8px; text-transform:uppercase; color:var(--text-dim);
+    padding:15px 16px; background:var(--surface-2); border-bottom:1px solid var(--border);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  tbody td{
+    padding:16px 16px; font-size:13.5px; border-bottom:1px solid var(--border); vertical-align:top;
+    overflow-wrap:break-word; word-break:break-word;
+  }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr:hover{ background:rgba(255,255,255,.015); }
+  td.ticket-id{ font-family:'JetBrains Mono', monospace; color:var(--gold); font-weight:600; font-size:12px; }
+  td.col-actions{ white-space:nowrap; }
+  .action-stack{ display:flex; flex-direction:column; gap:8px; align-items:flex-start; }
+ 
+  .status-select, .priority-select{
+    background:var(--surface-2); border:1px solid var(--border); color:var(--text);
+    font-family:'Inter', sans-serif; font-size:12.5px; padding:8px 10px; border-radius:8px; cursor:pointer; outline:none;
+    max-width:100%;
+  }
+  .status-select:focus, .priority-select:focus{ border-color:var(--gold); }
+
+  .remark-row{ display:flex; flex-direction:column; gap:8px; margin-top:4px; }
+  .remark-row textarea{ font-size:12.5px; padding:9px 10px; min-height:60px; }
+  .remark-saved{
+    font-size:11.5px; color:var(--text-dim); background:var(--surface); border:1px dashed var(--border);
+    border-radius:7px; padding:8px 10px; overflow-wrap:break-word;
+  }
+ 
+  .mobile-cards{ display:none; flex-direction:column; gap:14px; }
+  .g-card{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:18px; overflow-wrap:break-word; }
+  .g-card .row1{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:8px; flex-wrap:wrap; }
+  .g-card .ticket-id{ font-family:'JetBrains Mono', monospace; color:var(--gold); font-weight:600; font-size:12.5px; }
+  .g-card .topic{ font-size:14.5px; font-weight:600; margin-bottom:4px; }
+  .g-card .meta{ font-size:12px; color:var(--text-dim); margin-bottom:14px; }
+  .g-card .row2{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .g-card .row3{ margin-top:12px; }
+ 
+  
+  .admin-layout{ display:flex; gap:24px; align-items:flex-start; }
+  .admin-nav{
+    width:216px; flex:none; display:flex; flex-direction:column; gap:6px;
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:12px; box-shadow:var(--shadow); position:sticky; top:96px;
+  }
+  .nav-item{
+    appearance:none; border:none; cursor:pointer; background:transparent; text-align:left;
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    font-family:'Sora', sans-serif; font-size:13.5px; font-weight:600; color:var(--text-dim);
+    padding:10px 12px; border-radius:9px; transition:background .15s ease, color .15s ease;
+  }
+  .nav-item:hover{ background:var(--surface-2); color:var(--text); }
+  .nav-item.active{ background:var(--gold-soft); color:var(--gold); }
+  .nav-item .nav-count{
+    font-family:'JetBrains Mono', monospace; font-size:11px; font-weight:600;
+    background:var(--surface-2); color:var(--text-dim); border-radius:100px; padding:2px 8px; flex:none;
+  }
+  .nav-item.active .nav-count{ background:rgba(212,162,78,.2); color:var(--gold); }
+  .nav-divider{ height:1px; background:var(--border); margin:6px 4px; }
+  .nav-label{ font-size:10.5px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--text-dim); padding:8px 12px 2px; }
+  .admin-content{ flex:1; min-width:0; }
+  .admin-view{ display:none; }
+  .admin-view.active{ display:block; }
+
+  .search-result-wrap{ margin-top:16px; }
+  .search-hint{ font-size:12.5px; color:var(--text-dim); }
+  .result-card{
+    background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:20px;
+  }
+  .result-card .row1{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+  .result-card .topic{ font-size:15px; font-weight:600; margin-top:4px; }
+  .result-card .meta{ font-size:12px; color:var(--text-dim); margin-top:3px; }
+  .result-card .desc{ font-size:13px; color:var(--text); margin-top:12px; line-height:1.55; }
+  .result-card .desc .dlabel{ font-size:10.5px; color:var(--gold); text-transform:uppercase; letter-spacing:.6px; font-weight:600; margin-bottom:5px; }
+
+  @media (max-width:900px){
+    .admin-layout{ flex-direction:column; }
+    .admin-nav{
+      width:100%; flex-direction:row; overflow-x:auto; position:static;
+      gap:6px; padding:10px;
+    }
+    .nav-item{ flex:none; white-space:nowrap; }
+    .nav-divider{ display:none; }
+    .nav-label{ display:none; }
+  }
+  @media (max-width:760px){
+    .topbar{ padding:16px 18px; }
+    .wrap{ padding:28px 16px 60px; }
+    .table-card{ display:none; }
+    .mobile-cards{ display:flex; }
+    .stats{ gap:10px; }
+    .stat{ min-width:100px; padding:12px 14px; }
+  }
+  @media (max-width:420px){
+    .panel{ padding:26px 20px 22px; }
+    .brand h1{ font-size:18px; }
+  }
+</style>
+</head>
+<body>
+ 
+  
+  <div id="page-login">
+    <div class="login-inner">
+      <div class="brand">
+        <div class="mark">GBU</div>
+        <h1>Grievance &amp; Ticket Portal</h1>
+        <p>Gautam Buddha University — Student Support Desk</p>
+      </div>
+ 
+      <div class="stub">
+        <div class="toggle">
+          <button type="button" id="tabStudent" class="active" onclick="switchLoginTab('student')">Student Login</button>
+          <button type="button" id="tabAdmin" onclick="switchLoginTab('admin')">Admin Login</button>
+        </div>
+ 
+        <div class="panel">
+          
+          <div id="viewStudent" class="form-view active">
+            <div class="eyebrow">Student Access</div>
+            <h2>Log in to your desk</h2>
+            <p class="sub">Use your roll number to raise or track a grievance.</p>
+            <form id="studentForm" novalidate>
+              <div>
+                <label for="rollNo">Roll Number</label>
+                <input type="text" id="rollNo" placeholder="e.g. 2023ICT1042" required>
+              </div>
+              <div>
+                <label for="studentDept">Department</label>
+                <select id="studentDept" required>
+                  <option value="" disabled selected>Select department</option>
+                  <option value="ICT">ICT</option>
+                  <option value="Management">Management</option>
+                  <option value="Law">Law</option>
+                  <option value="Biotechnology">Biotechnology</option>
+                  <option value="Humanities">Humanities</option>
+                </select>
+              </div>
+              <div class="error-msg" id="studentError">Please fill in all fields to continue.</div>
+              <button type="submit" class="submit-btn">Enter Student Desk →</button>
+            </form>
+          </div>
+ 
+          
+          <div id="viewAdmin" class="form-view">
+            <div class="eyebrow">Admin Access</div>
+            <h2>Log in to the console</h2>
+            <p class="sub">Authorized staff only. Manage and resolve tickets.</p>
+            <form id="adminForm" novalidate>
+              <div>
+                <label for="adminUser">Username</label>
+                <input type="text" id="adminUser" placeholder="admin" required>
+              </div>
+              <div>
+                <label for="adminPass">Password</label>
+                <input type="password" id="adminPass" placeholder="••••••••" required>
+              </div>
+              <div class="error-msg" id="adminError">Invalid username or password.</div>
+              <button type="submit" class="submit-btn">Enter Admin Console →</button>
+            </form>
+          </div>
+        </div>
+      </div>
+ 
+      <p class="foot-note">Demo credentials — Admin: <b>admin</b> / <b>gbu2026</b></p>
+    </div>
+  </div>
+ 
+  
+  <div id="page-student" class="hidden">
+    <div class="topbar">
+      <div class="lockup">
+        <div class="mark">GBU</div>
+        <div><h1>Grievance &amp; Ticket Portal</h1><div class="sub">Student Desk</div></div>
+      </div>
+      <button class="logout" onclick="logout()">Log out</button>
+    </div>
+ 
+    <div class="wrap">
+      <div class="heading">
+        <div class="eyebrow">Student Desk</div>
+        <h2 id="welcomeHeading">Welcome back</h2>
+        <p id="welcomeSub">Raise a new grievance or check the status of an existing ticket below.</p>
+      </div>
+ 
+      <div class="grid">
+        
+        <div class="card">
+          <h3>Submit a grievance</h3>
+          <p class="card-sub">Describe your issue and we'll route it to the right desk.</p>
+          <form id="grievanceForm">
+            <div>
+              <label for="topic">Topic</label>
+              <input type="text" id="topic" placeholder="e.g. Delayed hostel maintenance request" required>
+            </div>
+            <div>
+              <label for="addressedTo">Addressed to</label>
+              <select id="addressedTo" required>
+                <option value="" disabled selected>Select category</option>
+                <option value="Hostel">Hostel</option>
+                <option value="Academics">Academics</option>
+                <option value="Fees Management">Fees Management</option>
+                <option value="Sports">Sports</option>
+                <option value="Administration">Administration</option>
+                <option value="Library">Library</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label for="description">Description</label>
+              <textarea id="description" rows="4" placeholder="Explain what happened, when, and what resolution you're looking for..." required></textarea>
+            </div>
+            <button type="submit" class="btn">Submit Grievance</button>
+          </form>
+          <div class="ticket-stub" id="ticketStub">
+            <div>
+              <div class="label">Your Ticket ID</div>
+              <div class="id" id="newTicketId">—</div>
+            </div>
+            <div class="note">Saved below in "My Grievances" — you can track its progress any time.</div>
+          </div>
+        </div>
+ 
+        
+        <div class="card">
+          <h3>My grievances</h3>
+          <p class="card-sub">Every ticket you've raised, oldest to latest, with live status.</p>
+          <div class="g-list" id="myGrievances"></div>
+          <div class="empty-state hidden" id="myGrievancesEmpty">
+            <div class="big">No grievances yet</div>
+            <div class="small">Grievances you submit will appear here with their status.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+ 
+  <div id="page-admin" class="hidden">
+    <div class="topbar">
+      <div class="lockup">
+        <div class="mark">GBU</div>
+        <div><h1>Grievance &amp; Ticket Portal</h1><div class="sub">Admin Console</div></div>
+      </div>
+      <button class="logout" onclick="logout()">Log out</button>
+    </div>
+ 
+    <div class="wrap">
+      <div class="heading">
+        <div class="eyebrow">Admin Console</div>
+        <h2>All grievances</h2>
+        <p>Review, search, prioritize, leave remarks, and update the status of every ticket raised by students.</p>
+      </div>
+ 
+      <div class="stats">
+        <div class="stat pending"><div class="num" id="statPending">0</div><div class="lbl">Pending</div></div>
+        <div class="stat progress"><div class="num" id="statProgress">0</div><div class="lbl">In Progress</div></div>
+        <div class="stat"><div class="num" id="statOngoing">0</div><div class="lbl">Ongoing (Total)</div></div>
+        <div class="stat resolved"><div class="num" id="statResolved">0</div><div class="lbl">Addressed (Resolved)</div></div>
+        <div class="stat high"><div class="num" id="statHigh">0</div><div class="lbl">High Priority</div></div>
+        <div class="stat"><div class="num" id="statTotal">0</div><div class="lbl">Total Tickets</div></div>
+      </div>
+ 
+      <div class="toolbar">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchInput" placeholder="Search by Ticket ID...">
+        </div>
+        <select class="filter-select" id="priorityFilter">
+          <option value="">All priorities</option>
+          <option value="High">High only</option>
+          <option value="Medium">Medium only</option>
+          <option value="Low">Low only</option>
+        </select>
+        <button class="sort-btn" id="sortBtn" onclick="toggleSort()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+          <span id="sortLabel">Oldest first</span>
+        </button>
+      </div>
+ 
+      <div class="table-card">
+        <table>
+          <colgroup>
+            <col style="width:12%"><col style="width:22%"><col style="width:12%">
+            <col style="width:11%"><col style="width:11%"><col style="width:32%">
+          </colgroup>
+          <thead>
+            <tr><th>Ticket ID</th><th>Topic</th><th>Addressed To</th><th>Status</th><th>Priority</th><th>Admin Actions</th></tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+        <div class="empty-state hidden" id="emptyStateDesktop">
+          <div class="big">No grievances yet</div>
+          <div class="small">Tickets submitted by students will show up here.</div>
+        </div>
+      </div>
+ 
+      <div class="mobile-cards" id="mobileCards"></div>
+      <div class="empty-state hidden" id="emptyStateMobile"></div>
+    </div>
+  </div>
+ 
+  
+  <div class="toast" id="toast">
+    <span class="dot"></span>
+    <span id="toastMsg">Email sent</span>
+  </div>
+ 
+<script>
+  
+  function showPage(name){
+    document.getElementById('page-login').classList.toggle('hidden', name !== 'login');
+    document.getElementById('page-student').classList.toggle('hidden', name !== 'student');
+    document.getElementById('page-admin').classList.toggle('hidden', name !== 'admin');
+    window.scrollTo(0, 0);
+  }
+ 
+  function logout(){
+    sessionStorage.removeItem('gbu_role');
+    sessionStorage.removeItem('gbu_student');
+    showPage('login');
+  }
+ 
+  
+  function switchLoginTab(role){
+    const isStudent = role === 'student';
+    document.getElementById('tabStudent').classList.toggle('active', isStudent);
+    document.getElementById('tabAdmin').classList.toggle('active', !isStudent);
+    document.getElementById('viewStudent').classList.toggle('active', isStudent);
+    document.getElementById('viewAdmin').classList.toggle('active', !isStudent);
+  }
+ 
+  
+  function getGrievances(){ return JSON.parse(localStorage.getItem('gbu_grievances') || '[]'); }
+  function saveGrievances(list){ localStorage.setItem('gbu_grievances', JSON.stringify(list)); }
+ 
+  function generateTicketId(){
+    const year = new Date().getFullYear();
+    const list = getGrievances();
+    const sameYear = list.filter(g => g.ticketId.startsWith(`GBU_${year}_`));
+    const nextNum = sameYear.length + 1;
+    return `GBU_${year}_${String(nextNum).padStart(4, '0')}`;
+  }
+ 
+  function showToast(msg){
+    const toast = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3200);
+  }
+ 
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+ 
+  const STATUS_STEP = { 'Pending':1, 'In Progress':2, 'Resolved':3 };
+  const BADGE_CLASS = { 'Pending':'pending', 'In Progress':'progress', 'Resolved':'resolved' };
+  const STATUS_OPTIONS = ['Pending', 'In Progress', 'Resolved'];
+  const PRIORITY_OPTIONS = ['Low', 'Medium', 'High'];
+ 
+  function stepperHtml(status){
+    const current = STATUS_STEP[status] || 1;
+    const steps = ['Pending', 'In Progress', 'Resolved'];
+    return `<div class="stepper">${steps.map((label, i) => {
+      const n = i + 1;
+      let cls = '';
+      if(n < current) cls = 'done';
+      else if(n === current) cls = (status === 'Resolved') ? 'done' : 'current';
+      return `<div class="step ${cls}"><div class="line"></div><div class="node">${n}</div><div class="name">${label}</div></div>`;
+    }).join('')}</div>`;
+  }
+ 
+  
+  document.getElementById('studentForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const rollNo = document.getElementById('rollNo').value.trim();
+    const department = document.getElementById('studentDept').value;
+    const errorBox = document.getElementById('studentError');
+    if(!rollNo || !department){ errorBox.classList.add('show'); return; }
+    errorBox.classList.remove('show');
+ 
+    sessionStorage.setItem('gbu_role', 'student');
+    sessionStorage.setItem('gbu_student', JSON.stringify({ rollNo, department }));
+    enterStudentDesk();
+  });
+ 
+  
+  document.getElementById('adminForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const user = document.getElementById('adminUser').value.trim();
+    const pass = document.getElementById('adminPass').value;
+    const errorBox = document.getElementById('adminError');
+    if(user === 'admin' && pass === 'gbu2026'){
+      errorBox.classList.remove('show');
+      sessionStorage.setItem('gbu_role', 'admin');
+      enterAdminConsole();
+    } else {
+      errorBox.classList.add('show');
+    }
+  });
+ 
+  
+  let currentStudent = null;
+ 
+  function enterStudentDesk(){
+    currentStudent = JSON.parse(sessionStorage.getItem('gbu_student') || '{}');
+    document.getElementById('welcomeHeading').textContent = `Welcome, ${currentStudent.rollNo}`;
+    document.getElementById('welcomeSub').innerHTML =
+      `Department on file: <b>${currentStudent.department}</b>. Raise a new grievance or review your tickets below.`;
+    document.getElementById('grievanceForm').reset();
+    document.getElementById('ticketStub').classList.remove('show');
+    renderMyGrievances();
+    showPage('student');
+  }
+ 
+  document.getElementById('grievanceForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const topic = document.getElementById('topic').value.trim();
+    const addressedTo = document.getElementById('addressedTo').value;
+    const description = document.getElementById('description').value.trim();
+    if(!topic || !addressedTo || !description) return;
+ 
+    const grievance = {
+      ticketId: generateTicketId(),
+      rollNo: currentStudent.rollNo,
+      department: addressedTo,
+      topic, description,
+      status: 'Pending',
+      priority: 'Low',
+      remark: '',
+      createdAt: new Date().toISOString()
+    };
+    const list = getGrievances();
+    list.push(grievance);
+    saveGrievances(list);
+ 
+    document.getElementById('newTicketId').textContent = grievance.ticketId;
+    document.getElementById('ticketStub').classList.add('show');
+    this.reset();
+    showToast(`Confirmation email sent — Ticket ${grievance.ticketId}`);
+    renderMyGrievances();
+  });
+ 
+  function renderMyGrievances(){
+    const list = getGrievances()
+      .filter(g => g.rollNo === currentStudent.rollNo)
+      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)); 
+ 
+    const container = document.getElementById('myGrievances');
+    const empty = document.getElementById('myGrievancesEmpty');
+    container.innerHTML = '';
+ 
+    if(list.length === 0){ empty.classList.remove('hidden'); return; }
+    empty.classList.add('hidden');
+ 
+    list.forEach(g => {
+      const el = document.createElement('div');
+      el.className = 'g-item';
+      el.innerHTML = `
+        <div class="row1">
+          <div>
+            <div class="id">${g.ticketId}</div>
+            <div class="topic">${escapeHtml(g.topic)}</div>
+            <div class="meta">Addressed to ${g.department} · ${new Date(g.createdAt).toLocaleDateString()}</div>
+          </div>
+          <div class="badges">
+            ${g.priority && g.priority !== 'Low' ? `<span class="pbadge ${g.priority.toLowerCase()}">${g.priority} priority</span>` : ''}
+            <span class="badge ${BADGE_CLASS[g.status]}">${g.status}</span>
+          </div>
+        </div>
+        ${stepperHtml(g.status)}
+        ${g.remark ? `<div class="remark-box"><div class="rlabel">Note from admin</div>${escapeHtml(g.remark)}</div>` : ''}
+      `;
+      container.appendChild(el);
+    });
+  }
+ 
+  
+  let sortDesc = false; 
+  let searchTerm = '';
+  let priorityFilterVal = '';
+ 
+  function enterAdminConsole(){
+    document.getElementById('searchInput').value = '';
+    document.getElementById('priorityFilter').value = '';
+    searchTerm = '';
+    priorityFilterVal = '';
+    sortDesc = false;
+    document.getElementById('sortBtn').classList.remove('desc');
+    document.getElementById('sortLabel').textContent = 'Oldest first';
+    renderAdmin();
+    showPage('admin');
+  }
+ 
+  function renderAdmin(){
+    let list = getGrievances();
+ 
+    document.getElementById('statPending').textContent = list.filter(g => g.status === 'Pending').length;
+    document.getElementById('statProgress').textContent = list.filter(g => g.status === 'In Progress').length;
+    document.getElementById('statOngoing').textContent = list.filter(g => g.status !== 'Resolved').length;
+    document.getElementById('statResolved').textContent = list.filter(g => g.status === 'Resolved').length;
+    document.getElementById('statHigh').textContent = list.filter(g => g.priority === 'High').length;
+    document.getElementById('statTotal').textContent = list.length;
+ 
+    if(searchTerm){
+      list = list.filter(g => g.ticketId.toLowerCase().includes(searchTerm.toLowerCase()));
+    }
+    if(priorityFilterVal){
+      list = list.filter(g => (g.priority || 'Low') === priorityFilterVal);
+    }
+    list = list.slice().sort((a, b) => {
+      const diff = new Date(a.createdAt) - new Date(b.createdAt);
+      return sortDesc ? -diff : diff;
+    });
+ 
+    const tableBody = document.getElementById('tableBody');
+    const mobileCards = document.getElementById('mobileCards');
+    const emptyDesktop = document.getElementById('emptyStateDesktop');
+    const emptyMobile = document.getElementById('emptyStateMobile');
+    tableBody.innerHTML = '';
+    mobileCards.innerHTML = '';
+ 
+    if(list.length === 0){
+      emptyDesktop.classList.remove('hidden');
+      emptyMobile.classList.remove('hidden');
+      emptyMobile.innerHTML = `<div class="big">No grievances found</div><div class="small">Try a different search or filter, or wait for new submissions.</div>`;
+      return;
+    }
+    emptyDesktop.classList.add('hidden');
+    emptyMobile.classList.add('hidden');
+ 
+    list.forEach(g => {
+      const priority = g.priority || 'Low';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="ticket-id">${g.ticketId}</td>
+        <td>${escapeHtml(g.topic)}</td>
+        <td>${g.department}</td>
+        <td>${buildStatusSelectHtml(g.ticketId, g.status)}</td>
+        <td>${buildPrioritySelectHtml(g.ticketId, priority)}</td>
+        <td class="col-actions">${buildRemarkHtml(g.ticketId, g.remark)}</td>
+      `;
+      tableBody.appendChild(tr);
+ 
+      const card = document.createElement('div');
+      card.className = 'g-card';
+      card.innerHTML = `
+        <div class="row1">
+          <span class="ticket-id">${g.ticketId}</span>
+          <span class="badge ${BADGE_CLASS[g.status]}">${g.status}</span>
+        </div>
+        <div class="topic">${escapeHtml(g.topic)}</div>
+        <div class="meta">${g.department} · Roll No ${escapeHtml(g.rollNo)}</div>
+        <div class="row2">
+          ${buildStatusSelectHtml(g.ticketId, g.status)}
+          ${buildPrioritySelectHtml(g.ticketId, priority)}
+        </div>
+        <div class="row3">${buildRemarkHtml(g.ticketId, g.remark)}</div>
+      `;
+      mobileCards.appendChild(card);
+    });
+ 
+    document.querySelectorAll('.status-select').forEach(sel => sel.addEventListener('change', onStatusChange));
+    document.querySelectorAll('.priority-select').forEach(sel => sel.addEventListener('change', onPriorityChange));
+    document.querySelectorAll('.remark-save-btn').forEach(btn => btn.addEventListener('click', onRemarkSave));
+  }
+ 
+  function buildStatusSelectHtml(ticketId, currentStatus){
+    const options = STATUS_OPTIONS.map(s => `<option value="${s}" ${s === currentStatus ? 'selected' : ''}>${s}</option>`).join('');
+    return `<select class="status-select" data-ticket="${ticketId}">${options}</select>`;
+  }
+
+  function buildPrioritySelectHtml(ticketId, currentPriority){
+    const options = PRIORITY_OPTIONS.map(p => `<option value="${p}" ${p === currentPriority ? 'selected' : ''}>${p}</option>`).join('');
+    return `<select class="priority-select" data-ticket="${ticketId}">${options}</select>`;
+  }
+
+  function buildRemarkHtml(ticketId, remark){
+    const safeRemark = escapeHtml(remark);
+    return `
+      <div class="remark-row">
+        ${remark ? `<div class="remark-saved">${safeRemark}</div>` : ''}
+        <textarea class="remark-input" data-ticket="${ticketId}" placeholder="Add a note visible to the student...">${safeRemark}</textarea>
+        <button type="button" class="btn-small remark-save-btn" data-ticket="${ticketId}">Save note &amp; notify student</button>
+      </div>
+    `;
+  }
+ 
+  function onStatusChange(e){
+    const ticketId = e.target.dataset.ticket;
+    const newStatus = e.target.value;
+    const list = getGrievances();
+    const grievance = list.find(g => g.ticketId === ticketId);
+    if(!grievance) return;
+    grievance.status = newStatus;
+    saveGrievances(list);
+    showToast(`Email sent to ${grievance.rollNo} — ${ticketId} is now "${newStatus}"`);
+    renderAdmin();
+  }
+
+  function onPriorityChange(e){
+    const ticketId = e.target.dataset.ticket;
+    const newPriority = e.target.value;
+    const list = getGrievances();
+    const grievance = list.find(g => g.ticketId === ticketId);
+    if(!grievance) return;
+    grievance.priority = newPriority;
+    saveGrievances(list);
+    showToast(`${ticketId} marked as ${newPriority} priority`);
+    renderAdmin();
+  }
+
+  function onRemarkSave(e){
+    const ticketId = e.target.dataset.ticket;
+    const wrapper = e.target.closest('.remark-row');
+    const textarea = wrapper.querySelector('.remark-input');
+    const remarkText = textarea.value.trim();
+    const list = getGrievances();
+    const grievance = list.find(g => g.ticketId === ticketId);
+    if(!grievance) return;
+    grievance.remark = remarkText;
+    saveGrievances(list);
+    showToast(remarkText ? `Note saved — email sent to ${grievance.rollNo}` : `Note cleared for ${ticketId}`);
+    renderAdmin();
+  }
+ 
+  document.getElementById('searchInput').addEventListener('input', function(){
+    searchTerm = this.value.trim();
+    renderAdmin();
+  });
+
+  document.getElementById('priorityFilter').addEventListener('change', function(){
+    priorityFilterVal = this.value;
+    renderAdmin();
+  });
+ 
+  function toggleSort(){
+    sortDesc = !sortDesc;
+    document.getElementById('sortBtn').classList.toggle('desc', sortDesc);
+    document.getElementById('sortLabel').textContent = sortDesc ? 'Latest first' : 'Oldest first';
+    renderAdmin();
+  }
+ 
+  
+  (function init(){
+    const role = sessionStorage.getItem('gbu_role');
+    if(role === 'student' && sessionStorage.getItem('gbu_student')){
+      enterStudentDesk();
+    } else if(role === 'admin'){
+      enterAdminConsole();
+    } else {
+      showPage('login');
+    }
+  })();
+</script>
+</body>
+</html>
