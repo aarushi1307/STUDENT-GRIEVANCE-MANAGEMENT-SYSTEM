@@ -6,30 +6,29 @@
 <title>GBU Grievance &amp; Ticket Portal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
   
   :root{
-    --bg:#0e1420;
-    --surface:#161f30;
-    --surface-2:#1c2740;
-    --border:#283354;
-    --text:#e8ecf5;
-    --text-dim:#8b95ab;
-    --gold:#d4a24e;
-    --gold-soft:rgba(212,162,78,.14);
-    --amber:#f0a93c;
-    --blue:#4f8ff0;
-    --green:#3ecf8e;
-    --red:#f26d6d;
+    --bg:#f4f5f8;
+    --surface:#ffffff;
+    --surface-2:#f1f2f6;
+    --border:#e3e5ec;
+    --text:#20232c;
+    --text-dim:#767b8a;
+    --gold:#b8842f;
+    --gold-soft:rgba(184,132,47,.10);
+    --amber:#c9791e;
+    --blue:#3568c9;
+    --green:#1f9d63;
+    --red:#d64545;
     --radius:14px;
-    --shadow:0 20px 50px -20px rgba(0,0,0,.6);
+    --shadow:0 8px 24px -12px rgba(20,22,30,.10);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{
-    background:
-      radial-gradient(1200px 600px at 15% -10%, rgba(212,162,78,.07), transparent 60%),
-      radial-gradient(900px 500px at 100% 0%, rgba(79,143,240,.05), transparent 60%),
-      var(--bg);
+    background:var(--bg);
     min-height:100vh;
     font-family:'Inter', sans-serif;
     color:var(--text);
@@ -37,11 +36,11 @@
   h1,h2,h3,.eyebrow{ font-family:'Sora', sans-serif; }
   .hidden{ display:none !important; }
  
-  
+  /* ---------- Shared: top bar (student / admin views) ---------- */
   .topbar{
     display:flex; align-items:center; justify-content:space-between;
     padding:20px 32px; border-bottom:1px solid var(--border);
-    background:rgba(22,31,48,.6); backdrop-filter:blur(8px);
+    background:rgba(255,255,255,.85); backdrop-filter:blur(8px);
     position:sticky; top:0; z-index:10;
   }
   .topbar .lockup{ display:flex; align-items:center; gap:12px; }
@@ -117,8 +116,8 @@
   .btn-small:hover{ transform:translateY(-1px); }
  
   .error-msg{
-    font-size:12.5px; color:#ff8080; background:rgba(255,90,90,.08);
-    border:1px solid rgba(255,90,90,.25); border-radius:8px; padding:9px 12px; display:none;
+    font-size:12.5px; color:#b13333; background:rgba(214,69,69,.07);
+    border:1px solid rgba(214,69,69,.22); border-radius:8px; padding:9px 12px; display:none;
   }
   .error-msg.show{ display:block; }
  
@@ -151,7 +150,7 @@
     background:var(--surface-2); border:1px solid var(--green); color:var(--text);
     padding:13px 20px; border-radius:10px; font-size:13.5px;
     display:flex; align-items:center; gap:10px;
-    box-shadow:0 14px 30px -10px rgba(0,0,0,.6);
+    box-shadow:0 10px 26px -12px rgba(20,22,30,.18);
     opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
     z-index:50; max-width:90vw;
   }
@@ -180,13 +179,13 @@
     border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;
   }
   .toggle{
-    display:grid; grid-template-columns:1fr 1fr;
+    display:grid; grid-template-columns:repeat(3, 1fr);
     background:var(--surface-2); border-bottom:1px dashed var(--border);
   }
   .toggle button{
     appearance:none; border:none; cursor:pointer; background:transparent;
-    font-family:'Sora', sans-serif; font-size:13.5px; font-weight:600; letter-spacing:.3px;
-    color:var(--text-dim); padding:16px 10px;
+    font-family:'Sora', sans-serif; font-size:12.5px; font-weight:600; letter-spacing:.2px;
+    color:var(--text-dim); padding:16px 8px;
     transition:color .2s ease, background .2s ease;
   }
   .toggle button.active{ color:var(--gold); background:var(--surface); }
@@ -238,7 +237,7 @@
   .ticket-stub .id{ font-family:'JetBrains Mono', monospace; font-size:19px; font-weight:600; color:var(--gold); letter-spacing:.5px; }
   .ticket-stub .note{ font-size:12.5px; color:var(--text-dim); max-width:220px; }
  
-  
+ 
   .stepper{ display:flex; align-items:flex-start; margin-top:18px; padding:0 2px; }
   .step{ flex:1; display:flex; flex-direction:column; align-items:center; text-align:center; position:relative; min-width:0; }
   .step .node{
@@ -248,7 +247,7 @@
     font-family:'Sora', sans-serif; font-size:11px; font-weight:700; color:var(--text-dim);
     z-index:2; transition:all .25s ease; flex:none;
   }
-  
+ 
   .step .line{
     position:absolute; top:12px; left:-50%; right:50%;
     height:2px; background:var(--border); z-index:1;
@@ -287,6 +286,8 @@
   .stat.progress .num{ color:var(--blue); }
   .stat.resolved .num{ color:var(--green); }
   .stat.high .num{ color:var(--red); }
+  .stat.aging .num{ color:var(--red); }
+  .pbadge.aging{ color:var(--red); border-color:rgba(214,69,69,.3); background:rgba(214,69,69,.07); }
  
   .toolbar{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:18px; }
   .search-box{ position:relative; flex:1; min-width:220px; }
@@ -322,7 +323,7 @@
     overflow-wrap:break-word; word-break:break-word;
   }
   tbody tr:last-child td{ border-bottom:none; }
-  tbody tr:hover{ background:rgba(255,255,255,.015); }
+  tbody tr:hover{ background:rgba(20,22,30,.02); }
   td.ticket-id{ font-family:'JetBrains Mono', monospace; color:var(--gold); font-weight:600; font-size:12px; }
   td.col-actions{ white-space:nowrap; }
   .action-stack{ display:flex; flex-direction:column; gap:8px; align-items:flex-start; }
@@ -350,7 +351,7 @@
   .g-card .row2{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
   .g-card .row3{ margin-top:12px; }
  
-  
+  /* ---------- Admin: department sidebar + view switching ---------- */
   .admin-layout{ display:flex; gap:24px; align-items:flex-start; }
   .admin-nav{
     width:216px; flex:none; display:flex; flex-direction:column; gap:6px;
@@ -425,19 +426,24 @@
       <div class="stub">
         <div class="toggle">
           <button type="button" id="tabStudent" class="active" onclick="switchLoginTab('student')">Student Login</button>
+          <button type="button" id="tabTrack" onclick="switchLoginTab('track')">Track Ticket</button>
           <button type="button" id="tabAdmin" onclick="switchLoginTab('admin')">Admin Login</button>
         </div>
  
         <div class="panel">
-          
+          <!-- Student login -->
           <div id="viewStudent" class="form-view active">
             <div class="eyebrow">Student Access</div>
             <h2>Log in to your desk</h2>
-            <p class="sub">Use your roll number to raise or track a grievance.</p>
+            <p class="sub">Use your roll number to raise a grievance or view all grievances filed under it.</p>
             <form id="studentForm" novalidate>
               <div>
                 <label for="rollNo">Roll Number</label>
                 <input type="text" id="rollNo" placeholder="e.g. 2023ICT1042" required>
+              </div>
+              <div>
+                <label for="studentEmail">Email Address</label>
+                <input type="email" id="studentEmail" placeholder="you@gbu.ac.in" required>
               </div>
               <div>
                 <label for="studentDept">Department</label>
@@ -454,8 +460,22 @@
               <button type="submit" class="submit-btn">Enter Student Desk →</button>
             </form>
           </div>
+
+          <!-- Track by Ticket ID: no login needed, doesn't expose other grievances -->
+          <div id="viewTrack" class="form-view">
+            <div class="eyebrow">Quick Status Check</div>
+            <h2>Track a single ticket</h2>
+            <p class="sub">Enter your exact Ticket ID to check its status — this won't show any other grievance, even from the same roll number.</p>
+            <div>
+              <label for="trackTicketId">Ticket ID</label>
+              <input type="text" id="trackTicketId" placeholder="e.g. GBU_2026_0001">
+            </div>
+            <div class="error-msg" id="trackError">No grievance found with that Ticket ID.</div>
+            <button type="button" class="submit-btn" onclick="trackTicketLookup()">Check Status →</button>
+            <div id="trackResultWrap" style="margin-top:6px;"></div>
+          </div>
  
-          
+          <!-- Admin login -->
           <div id="viewAdmin" class="form-view">
             <div class="eyebrow">Admin Access</div>
             <h2>Log in to the console</h2>
@@ -498,7 +518,7 @@
       </div>
  
       <div class="grid">
-        
+        <!-- Submit grievance -->
         <div class="card">
           <h3>Submit a grievance</h3>
           <p class="card-sub">Describe your issue and we'll route it to the right desk.</p>
@@ -535,7 +555,7 @@
           </div>
         </div>
  
-        
+        <!-- My grievances -->
         <div class="card">
           <h3>My grievances</h3>
           <p class="card-sub">Every ticket you've raised, oldest to latest, with live status.</p>
@@ -560,56 +580,72 @@
  
     <div class="wrap">
       <div class="heading">
-        <div class="eyebrow">Admin Console</div>
-        <h2>All grievances</h2>
-        <p>Review, search, prioritize, leave remarks, and update the status of every ticket raised by students.</p>
+        <div class="eyebrow" id="adminEyebrow">Admin Console</div>
+        <h2 id="adminHeading">Overview</h2>
+        <p id="adminSub">A quick snapshot of every ticket. Pick a department on the left to review and resolve issues addressed to them.</p>
       </div>
- 
-      <div class="stats">
-        <div class="stat pending"><div class="num" id="statPending">0</div><div class="lbl">Pending</div></div>
-        <div class="stat progress"><div class="num" id="statProgress">0</div><div class="lbl">In Progress</div></div>
-        <div class="stat"><div class="num" id="statOngoing">0</div><div class="lbl">Ongoing (Total)</div></div>
-        <div class="stat resolved"><div class="num" id="statResolved">0</div><div class="lbl">Addressed (Resolved)</div></div>
-        <div class="stat high"><div class="num" id="statHigh">0</div><div class="lbl">High Priority</div></div>
-        <div class="stat"><div class="num" id="statTotal">0</div><div class="lbl">Total Tickets</div></div>
-      </div>
- 
-      <div class="toolbar">
-        <div class="search-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="searchInput" placeholder="Search by Ticket ID...">
+
+      <div class="admin-layout">
+        <!-- Department menu -->
+        <nav class="admin-nav" id="adminNav">
+          <button class="nav-item active" data-view="overview">
+            <span>Overview</span>
+          </button>
+          <div class="nav-divider"></div>
+          <div class="nav-label">Departments</div>
+          <button class="nav-item" data-view="Hostel"><span>Hostel</span><span class="nav-count" id="cnt-Hostel">0</span></button>
+          <button class="nav-item" data-view="Academics"><span>Academics</span><span class="nav-count" id="cnt-Academics">0</span></button>
+          <button class="nav-item" data-view="Fees Management"><span>Fees Management</span><span class="nav-count" id="cnt-Fees Management">0</span></button>
+          <button class="nav-item" data-view="Sports"><span>Sports</span><span class="nav-count" id="cnt-Sports">0</span></button>
+          <button class="nav-item" data-view="Administration"><span>Administration</span><span class="nav-count" id="cnt-Administration">0</span></button>
+          <button class="nav-item" data-view="Library"><span>Library</span><span class="nav-count" id="cnt-Library">0</span></button>
+          <button class="nav-item" data-view="Other"><span>Other</span><span class="nav-count" id="cnt-Other">0</span></button>
+        </nav>
+
+        <div class="admin-content">
+          <!-- ============ OVERVIEW: stats + search by ticket ID only ============ -->
+          <section class="admin-view active" id="viewOverview">
+            <div class="stats">
+              <div class="stat pending"><div class="num" id="statPending">0</div><div class="lbl">Pending</div></div>
+              <div class="stat progress"><div class="num" id="statProgress">0</div><div class="lbl">In Progress</div></div>
+              <div class="stat"><div class="num" id="statOngoing">0</div><div class="lbl">Ongoing (Total)</div></div>
+              <div class="stat resolved"><div class="num" id="statResolved">0</div><div class="lbl">Addressed (Resolved)</div></div>
+              <div class="stat high"><div class="num" id="statHigh">0</div><div class="lbl">High Priority</div></div>
+              <div class="stat aging"><div class="num" id="statAging">0</div><div class="lbl">Aging (48h+)</div></div>
+              <div class="stat"><div class="num" id="statTotal">0</div><div class="lbl">Total Tickets</div></div>
+            </div>
+
+            <div class="card">
+              <h3>Look up a ticket</h3>
+              <p class="card-sub">Search by exact or partial Ticket ID to view its full detail.</p>
+              <div class="search-box" style="max-width:360px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="idSearchInput" placeholder="e.g. GBU_2026_0003">
+              </div>
+              <div class="search-result-wrap" id="idSearchResultWrap"></div>
+            </div>
+          </section>
+
+          <section class="admin-view" id="viewDept">
+            <div class="toolbar">
+              <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="deptSearchInput" placeholder="Search by Ticket ID...">
+              </div>
+              <button class="sort-btn" id="deptSortBtn" onclick="toggleDeptSort()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+                <span id="deptSortLabel">Oldest first</span>
+              </button>
+            </div>
+
+            <div class="g-list" id="deptList"></div>
+            <div class="empty-state hidden" id="deptEmpty">
+              <div class="big">No grievances yet</div>
+              <div class="small">Tickets addressed to this department will show up here.</div>
+            </div>
+          </section>
         </div>
-        <select class="filter-select" id="priorityFilter">
-          <option value="">All priorities</option>
-          <option value="High">High only</option>
-          <option value="Medium">Medium only</option>
-          <option value="Low">Low only</option>
-        </select>
-        <button class="sort-btn" id="sortBtn" onclick="toggleSort()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-          <span id="sortLabel">Oldest first</span>
-        </button>
       </div>
- 
-      <div class="table-card">
-        <table>
-          <colgroup>
-            <col style="width:12%"><col style="width:22%"><col style="width:12%">
-            <col style="width:11%"><col style="width:11%"><col style="width:32%">
-          </colgroup>
-          <thead>
-            <tr><th>Ticket ID</th><th>Topic</th><th>Addressed To</th><th>Status</th><th>Priority</th><th>Admin Actions</th></tr>
-          </thead>
-          <tbody id="tableBody"></tbody>
-        </table>
-        <div class="empty-state hidden" id="emptyStateDesktop">
-          <div class="big">No grievances yet</div>
-          <div class="small">Tickets submitted by students will show up here.</div>
-        </div>
-      </div>
- 
-      <div class="mobile-cards" id="mobileCards"></div>
-      <div class="empty-state hidden" id="emptyStateMobile"></div>
     </div>
   </div>
  
@@ -621,6 +657,37 @@
  
 <script>
   
+  const EMAIL_CONFIG = {
+    SERVICE_ID:  'YOUR_SERVICE_ID',
+    TEMPLATE_ID: 'YOUR_TEMPLATE_ID',
+    PUBLIC_KEY:  'YOUR_PUBLIC_KEY'
+  };
+  const EMAIL_ENABLED = !EMAIL_CONFIG.SERVICE_ID.startsWith('YOUR_')
+                      && !EMAIL_CONFIG.TEMPLATE_ID.startsWith('YOUR_')
+                      && !EMAIL_CONFIG.PUBLIC_KEY.startsWith('YOUR_');
+
+  if(EMAIL_ENABLED && window.emailjs){
+    emailjs.init({ publicKey: EMAIL_CONFIG.PUBLIC_KEY });
+  }
+
+  
+  function sendGrievanceEmail({ toEmail, toName, ticketId, subject, message }){
+    if(EMAIL_ENABLED && window.emailjs && toEmail){
+      emailjs.send(EMAIL_CONFIG.SERVICE_ID, EMAIL_CONFIG.TEMPLATE_ID, {
+        to_email: toEmail, to_name: toName || toEmail,
+        ticket_id: ticketId, subject, message
+      }).then(() => {
+        showToast(`Email sent to ${toEmail} — ${subject}`);
+      }).catch(err => {
+        console.error('EmailJS error:', err);
+        showToast(`Couldn't send email (check EmailJS setup) — ${subject}`);
+      });
+    } else {
+      // Fallback: no EmailJS keys configured yet — simulate as before.
+      showToast(`${subject} (simulated — add EmailJS keys to send real mail)`);
+    }
+  }
+
   function showPage(name){
     document.getElementById('page-login').classList.toggle('hidden', name !== 'login');
     document.getElementById('page-student').classList.toggle('hidden', name !== 'student');
@@ -636,12 +703,45 @@
  
   
   function switchLoginTab(role){
-    const isStudent = role === 'student';
-    document.getElementById('tabStudent').classList.toggle('active', isStudent);
-    document.getElementById('tabAdmin').classList.toggle('active', !isStudent);
-    document.getElementById('viewStudent').classList.toggle('active', isStudent);
-    document.getElementById('viewAdmin').classList.toggle('active', !isStudent);
+    document.getElementById('tabStudent').classList.toggle('active', role === 'student');
+    document.getElementById('tabTrack').classList.toggle('active', role === 'track');
+    document.getElementById('tabAdmin').classList.toggle('active', role === 'admin');
+    document.getElementById('viewStudent').classList.toggle('active', role === 'student');
+    document.getElementById('viewTrack').classList.toggle('active', role === 'track');
+    document.getElementById('viewAdmin').classList.toggle('active', role === 'admin');
   }
+
+ 
+  function trackTicketLookup(){
+    const term = document.getElementById('trackTicketId').value.trim();
+    const errorBox = document.getElementById('trackError');
+    const wrap = document.getElementById('trackResultWrap');
+    wrap.innerHTML = '';
+    if(!term){ errorBox.classList.add('show'); return; }
+
+    const grievance = getGrievances().find(g => g.ticketId.toLowerCase() === term.toLowerCase());
+    if(!grievance){ errorBox.classList.add('show'); return; }
+    errorBox.classList.remove('show');
+
+    wrap.innerHTML = `
+      <div class="result-card">
+        <div class="row1">
+          <div>
+            <div class="id">${grievance.ticketId}</div>
+            <div class="topic">${escapeHtml(grievance.topic)}</div>
+            <div class="meta">Addressed to ${grievance.department}</div>
+          </div>
+          <span class="badge ${BADGE_CLASS[grievance.status]}">${grievance.status}</span>
+        </div>
+        ${stepperHtml(grievance.status)}
+        ${grievance.remark ? `<div class="remark-box"><div class="rlabel">Note from admin</div>${escapeHtml(grievance.remark)}</div>` : ''}
+      </div>
+    `;
+  }
+
+  document.getElementById('trackTicketId').addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); trackTicketLookup(); }
+  });
  
   
   function getGrievances(){ return JSON.parse(localStorage.getItem('gbu_grievances') || '[]'); }
@@ -672,6 +772,28 @@
   const BADGE_CLASS = { 'Pending':'pending', 'In Progress':'progress', 'Resolved':'resolved' };
   const STATUS_OPTIONS = ['Pending', 'In Progress', 'Resolved'];
   const PRIORITY_OPTIONS = ['Low', 'Medium', 'High'];
+
+  /* ==========================================================
+     AGING / SLA ALERTS (unique feature)
+     Any ticket that's still open (not Resolved) past this many hours
+     gets auto-flagged as "Aging" everywhere it appears — Overview
+     stats, department cards, and the student's own ticket list —
+     so nothing quietly sits untouched. Nothing gets auto-changed
+     (status/priority stay under human control); this is purely a
+     visibility nudge, like a lightweight SLA timer.
+     ========================================================== */
+  const AGING_THRESHOLD_HOURS = 48;
+
+  function ticketAgeHours(g){ return (Date.now() - new Date(g.createdAt).getTime()) / 3600000; }
+  function isAging(g){ return g.status !== 'Resolved' && ticketAgeHours(g) >= AGING_THRESHOLD_HOURS; }
+  function ticketAgeLabel(g){
+    const hours = ticketAgeHours(g);
+    const days = Math.floor(hours / 24);
+    return days >= 1 ? `${days}d open` : `${Math.max(1, Math.floor(hours))}h open`;
+  }
+  function agingBadgeHtml(g){
+    return isAging(g) ? `<span class="pbadge aging">⏰ Aging · ${ticketAgeLabel(g)}</span>` : '';
+  }
  
   function stepperHtml(status){
     const current = STATUS_STEP[status] || 1;
@@ -685,21 +807,26 @@
     }).join('')}</div>`;
   }
  
-  
+  /* ==========================================================
+     STUDENT LOGIN
+     ========================================================== */
   document.getElementById('studentForm').addEventListener('submit', function(e){
     e.preventDefault();
     const rollNo = document.getElementById('rollNo').value.trim();
+    const email = document.getElementById('studentEmail').value.trim();
     const department = document.getElementById('studentDept').value;
     const errorBox = document.getElementById('studentError');
-    if(!rollNo || !department){ errorBox.classList.add('show'); return; }
+    if(!rollNo || !email || !department){ errorBox.classList.add('show'); return; }
     errorBox.classList.remove('show');
  
     sessionStorage.setItem('gbu_role', 'student');
-    sessionStorage.setItem('gbu_student', JSON.stringify({ rollNo, department }));
+    sessionStorage.setItem('gbu_student', JSON.stringify({ rollNo, email, department }));
     enterStudentDesk();
   });
  
-  
+  /* ==========================================================
+     ADMIN LOGIN
+     ========================================================== */
   document.getElementById('adminForm').addEventListener('submit', function(e){
     e.preventDefault();
     const user = document.getElementById('adminUser').value.trim();
@@ -714,7 +841,9 @@
     }
   });
  
-  
+  /* ==========================================================
+     STUDENT DESK
+     ========================================================== */
   let currentStudent = null;
  
   function enterStudentDesk(){
@@ -738,6 +867,7 @@
     const grievance = {
       ticketId: generateTicketId(),
       rollNo: currentStudent.rollNo,
+      email: currentStudent.email,
       department: addressedTo,
       topic, description,
       status: 'Pending',
@@ -752,14 +882,20 @@
     document.getElementById('newTicketId').textContent = grievance.ticketId;
     document.getElementById('ticketStub').classList.add('show');
     this.reset();
-    showToast(`Confirmation email sent — Ticket ${grievance.ticketId}`);
+    sendGrievanceEmail({
+      toEmail: grievance.email,
+      toName: grievance.rollNo,
+      ticketId: grievance.ticketId,
+      subject: `Grievance received — ${grievance.ticketId}`,
+      message: `Hi ${grievance.rollNo},\n\nYour grievance "${grievance.topic}" has been received and assigned Ticket ID ${grievance.ticketId}. It's been routed to ${grievance.department} and marked Pending. You can track it any time with your Ticket ID.\n\n— GBU Grievance & Ticket Portal`
+    });
     renderMyGrievances();
   });
  
   function renderMyGrievances(){
     const list = getGrievances()
       .filter(g => g.rollNo === currentStudent.rollNo)
-      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)); 
+      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)); // oldest -> latest
  
     const container = document.getElementById('myGrievances');
     const empty = document.getElementById('myGrievancesEmpty');
@@ -779,6 +915,7 @@
             <div class="meta">Addressed to ${g.department} · ${new Date(g.createdAt).toLocaleDateString()}</div>
           </div>
           <div class="badges">
+            ${agingBadgeHtml(g)}
             ${g.priority && g.priority !== 'Low' ? `<span class="pbadge ${g.priority.toLowerCase()}">${g.priority} priority</span>` : ''}
             <span class="badge ${BADGE_CLASS[g.status]}">${g.status}</span>
           </div>
@@ -790,89 +927,164 @@
     });
   }
  
-  
-  let sortDesc = false; 
-  let searchTerm = '';
-  let priorityFilterVal = '';
+  /* ==========================================================
+     ADMIN CONSOLE
+     Two views:
+       - Overview: stats snapshot + search-by-Ticket-ID (read-only lookup)
+       - Department view: each department (menu on the left) sees ONLY
+         the tickets addressed to them, with full description, and can
+         mark status / priority / leave a remark themselves.
+     ========================================================== */
+  const DEPARTMENTS = ['Hostel','Academics','Fees Management','Sports','Administration','Library','Other'];
+  let currentAdminView = 'overview'; // 'overview' | one of DEPARTMENTS
+  let deptSortDesc = false;
+  let deptSearchTerm = '';
  
   function enterAdminConsole(){
-    document.getElementById('searchInput').value = '';
-    document.getElementById('priorityFilter').value = '';
-    searchTerm = '';
-    priorityFilterVal = '';
-    sortDesc = false;
-    document.getElementById('sortBtn').classList.remove('desc');
-    document.getElementById('sortLabel').textContent = 'Oldest first';
-    renderAdmin();
+    document.getElementById('idSearchInput').value = '';
+    document.getElementById('idSearchResultWrap').innerHTML = '';
+    currentAdminView = 'overview';
+    deptSortDesc = false;
+    deptSearchTerm = '';
+    switchAdminView('overview');
     showPage('admin');
   }
  
-  function renderAdmin(){
-    let list = getGrievances();
+  // Wire up the sidebar menu buttons once.
+  document.getElementById('adminNav').addEventListener('click', function(e){
+    const btn = e.target.closest('.nav-item');
+    if(!btn) return;
+    switchAdminView(btn.dataset.view);
+  });
  
+  function switchAdminView(view){
+    currentAdminView = view;
+    document.querySelectorAll('#adminNav .nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+ 
+    const isOverview = view === 'overview';
+    document.getElementById('viewOverview').classList.toggle('active', isOverview);
+    document.getElementById('viewDept').classList.toggle('active', !isOverview);
+ 
+    if(isOverview){
+      document.getElementById('adminEyebrow').textContent = 'Admin Console';
+      document.getElementById('adminHeading').textContent = 'Overview';
+      document.getElementById('adminSub').textContent = 'A quick snapshot of every ticket. Pick a department on the left to review and resolve issues addressed to them.';
+      renderOverview();
+    } else {
+      document.getElementById('adminEyebrow').textContent = view;
+      document.getElementById('adminHeading').textContent = `${view} desk`;
+      document.getElementById('adminSub').textContent = `Grievances addressed to ${view}, with full description. Mark status, set priority, or leave a note for the student.`;
+      deptSearchTerm = '';
+      document.getElementById('deptSearchInput').value = '';
+      renderDeptCounts();
+      renderDeptView(view);
+    }
+  }
+ 
+  function renderDeptCounts(){
+    const list = getGrievances();
+    DEPARTMENTS.forEach(dep => {
+      const el = document.getElementById(`cnt-${dep}`);
+      if(el) el.textContent = list.filter(g => g.department === dep).length;
+    });
+  }
+ 
+  /* ---------- OVERVIEW: stats + read-only search by Ticket ID ---------- */
+  function renderOverview(){
+    const list = getGrievances();
     document.getElementById('statPending').textContent = list.filter(g => g.status === 'Pending').length;
     document.getElementById('statProgress').textContent = list.filter(g => g.status === 'In Progress').length;
     document.getElementById('statOngoing').textContent = list.filter(g => g.status !== 'Resolved').length;
     document.getElementById('statResolved').textContent = list.filter(g => g.status === 'Resolved').length;
     document.getElementById('statHigh').textContent = list.filter(g => g.priority === 'High').length;
+    document.getElementById('statAging').textContent = list.filter(isAging).length;
     document.getElementById('statTotal').textContent = list.length;
+    renderDeptCounts();
+    runIdSearch();
+  }
  
-    if(searchTerm){
-      list = list.filter(g => g.ticketId.toLowerCase().includes(searchTerm.toLowerCase()));
+  function runIdSearch(){
+    const term = document.getElementById('idSearchInput').value.trim().toLowerCase();
+    const wrap = document.getElementById('idSearchResultWrap');
+    if(!term){ wrap.innerHTML = ''; return; }
+ 
+    const matches = getGrievances().filter(g => g.ticketId.toLowerCase().includes(term));
+    if(matches.length === 0){
+      wrap.innerHTML = `<p class="search-hint">No ticket matches "${escapeHtml(term)}".</p>`;
+      return;
     }
-    if(priorityFilterVal){
-      list = list.filter(g => (g.priority || 'Low') === priorityFilterVal);
+    wrap.innerHTML = matches.map(g => `
+      <div class="result-card" style="margin-bottom:14px;">
+        <div class="row1">
+          <div>
+            <div class="id">${g.ticketId}</div>
+            <div class="topic">${escapeHtml(g.topic)}</div>
+            <div class="meta">Addressed to ${g.department} · Roll No ${escapeHtml(g.rollNo)} · ${new Date(g.createdAt).toLocaleDateString()}</div>
+          </div>
+          <div class="badges">
+            ${agingBadgeHtml(g)}
+            ${g.priority && g.priority !== 'Low' ? `<span class="pbadge ${g.priority.toLowerCase()}">${g.priority} priority</span>` : ''}
+            <span class="badge ${BADGE_CLASS[g.status]}">${g.status}</span>
+          </div>
+        </div>
+        <div class="desc"><div class="dlabel">Description</div>${escapeHtml(g.description)}</div>
+        ${g.remark ? `<div class="remark-box"><div class="rlabel">Admin note on file</div>${escapeHtml(g.remark)}</div>` : ''}
+      </div>
+    `).join('');
+  }
+ 
+  document.getElementById('idSearchInput').addEventListener('input', runIdSearch);
+ 
+  /* ---------- DEPARTMENT VIEW: only this department's tickets, editable ---------- */
+  function renderDeptView(dept){
+    let list = getGrievances().filter(g => g.department === dept);
+ 
+    if(deptSearchTerm){
+      list = list.filter(g => g.ticketId.toLowerCase().includes(deptSearchTerm.toLowerCase()));
     }
     list = list.slice().sort((a, b) => {
       const diff = new Date(a.createdAt) - new Date(b.createdAt);
-      return sortDesc ? -diff : diff;
+      return deptSortDesc ? -diff : diff;
     });
  
-    const tableBody = document.getElementById('tableBody');
-    const mobileCards = document.getElementById('mobileCards');
-    const emptyDesktop = document.getElementById('emptyStateDesktop');
-    const emptyMobile = document.getElementById('emptyStateMobile');
-    tableBody.innerHTML = '';
-    mobileCards.innerHTML = '';
+    const container = document.getElementById('deptList');
+    const empty = document.getElementById('deptEmpty');
+    container.innerHTML = '';
  
     if(list.length === 0){
-      emptyDesktop.classList.remove('hidden');
-      emptyMobile.classList.remove('hidden');
-      emptyMobile.innerHTML = `<div class="big">No grievances found</div><div class="small">Try a different search or filter, or wait for new submissions.</div>`;
+      empty.classList.remove('hidden');
+      empty.querySelector('.big').textContent = deptSearchTerm ? 'No matching grievances' : 'No grievances yet';
+      empty.querySelector('.small').textContent = deptSearchTerm
+        ? 'Try a different Ticket ID.'
+        : `Tickets addressed to ${dept} will show up here.`;
       return;
     }
-    emptyDesktop.classList.add('hidden');
-    emptyMobile.classList.add('hidden');
+    empty.classList.add('hidden');
  
     list.forEach(g => {
       const priority = g.priority || 'Low';
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="ticket-id">${g.ticketId}</td>
-        <td>${escapeHtml(g.topic)}</td>
-        <td>${g.department}</td>
-        <td>${buildStatusSelectHtml(g.ticketId, g.status)}</td>
-        <td>${buildPrioritySelectHtml(g.ticketId, priority)}</td>
-        <td class="col-actions">${buildRemarkHtml(g.ticketId, g.remark)}</td>
-      `;
-      tableBody.appendChild(tr);
- 
-      const card = document.createElement('div');
-      card.className = 'g-card';
-      card.innerHTML = `
+      const el = document.createElement('div');
+      el.className = 'g-item';
+      el.innerHTML = `
         <div class="row1">
-          <span class="ticket-id">${g.ticketId}</span>
-          <span class="badge ${BADGE_CLASS[g.status]}">${g.status}</span>
+          <div>
+            <div class="id">${g.ticketId}</div>
+            <div class="topic">${escapeHtml(g.topic)}</div>
+            <div class="meta">Roll No ${escapeHtml(g.rollNo)} · ${new Date(g.createdAt).toLocaleDateString()}</div>
+          </div>
+          <div class="badges">
+            ${agingBadgeHtml(g)}
+            <span class="badge ${BADGE_CLASS[g.status]}">${g.status}</span>
+          </div>
         </div>
-        <div class="topic">${escapeHtml(g.topic)}</div>
-        <div class="meta">${g.department} · Roll No ${escapeHtml(g.rollNo)}</div>
-        <div class="row2">
+        <div class="desc"><div class="dlabel">Description</div>${escapeHtml(g.description)}</div>
+        <div class="row2" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
           ${buildStatusSelectHtml(g.ticketId, g.status)}
           ${buildPrioritySelectHtml(g.ticketId, priority)}
         </div>
-        <div class="row3">${buildRemarkHtml(g.ticketId, g.remark)}</div>
+        ${buildRemarkHtml(g.ticketId, g.remark)}
       `;
-      mobileCards.appendChild(card);
+      container.appendChild(el);
     });
  
     document.querySelectorAll('.status-select').forEach(sel => sel.addEventListener('change', onStatusChange));
@@ -893,10 +1105,10 @@
   function buildRemarkHtml(ticketId, remark){
     const safeRemark = escapeHtml(remark);
     return `
-      <div class="remark-row">
+      <div class="remark-row" style="margin-top:12px;">
         ${remark ? `<div class="remark-saved">${safeRemark}</div>` : ''}
         <textarea class="remark-input" data-ticket="${ticketId}" placeholder="Add a note visible to the student...">${safeRemark}</textarea>
-        <button type="button" class="btn-small remark-save-btn" data-ticket="${ticketId}">Save note &amp; notify student</button>
+        <button type="button" class="btn-small remark-save-btn" data-ticket="${ticketId}" style="align-self:flex-start;">Save note &amp; notify student</button>
       </div>
     `;
   }
@@ -909,8 +1121,15 @@
     if(!grievance) return;
     grievance.status = newStatus;
     saveGrievances(list);
-    showToast(`Email sent to ${grievance.rollNo} — ${ticketId} is now "${newStatus}"`);
-    renderAdmin();
+    sendGrievanceEmail({
+      toEmail: grievance.email,
+      toName: grievance.rollNo,
+      ticketId,
+      subject: `${ticketId} is now "${newStatus}"`,
+      message: `Hi ${grievance.rollNo},\n\nYour grievance "${grievance.topic}" (Ticket ${ticketId}) has been updated to "${newStatus}" by the ${grievance.department} desk.\n\n— GBU Grievance & Ticket Portal`
+    });
+    renderDeptView(currentAdminView);
+    renderDeptCounts();
   }
 
   function onPriorityChange(e){
@@ -922,7 +1141,7 @@
     grievance.priority = newPriority;
     saveGrievances(list);
     showToast(`${ticketId} marked as ${newPriority} priority`);
-    renderAdmin();
+    renderDeptView(currentAdminView);
   }
 
   function onRemarkSave(e){
@@ -935,28 +1154,33 @@
     if(!grievance) return;
     grievance.remark = remarkText;
     saveGrievances(list);
-    showToast(remarkText ? `Note saved — email sent to ${grievance.rollNo}` : `Note cleared for ${ticketId}`);
-    renderAdmin();
+    if(remarkText){
+      sendGrievanceEmail({
+        toEmail: grievance.email,
+        toName: grievance.rollNo,
+        ticketId,
+        subject: `New note on ${ticketId}`,
+        message: `Hi ${grievance.rollNo},\n\nThe ${grievance.department} desk left a note on your grievance "${grievance.topic}" (Ticket ${ticketId}):\n\n"${remarkText}"\n\n— GBU Grievance & Ticket Portal`
+      });
+    } else {
+      showToast(`Note cleared for ${ticketId}`);
+    }
+    renderDeptView(currentAdminView);
   }
- 
-  document.getElementById('searchInput').addEventListener('input', function(){
-    searchTerm = this.value.trim();
-    renderAdmin();
-  });
 
-  document.getElementById('priorityFilter').addEventListener('change', function(){
-    priorityFilterVal = this.value;
-    renderAdmin();
+  document.getElementById('deptSearchInput').addEventListener('input', function(){
+    deptSearchTerm = this.value.trim();
+    renderDeptView(currentAdminView);
   });
  
-  function toggleSort(){
-    sortDesc = !sortDesc;
-    document.getElementById('sortBtn').classList.toggle('desc', sortDesc);
-    document.getElementById('sortLabel').textContent = sortDesc ? 'Latest first' : 'Oldest first';
-    renderAdmin();
+  function toggleDeptSort(){
+    deptSortDesc = !deptSortDesc;
+    document.getElementById('deptSortBtn').classList.toggle('desc', deptSortDesc);
+    document.getElementById('deptSortLabel').textContent = deptSortDesc ? 'Latest first' : 'Oldest first';
+    renderDeptView(currentAdminView);
   }
  
-  
+ 
   (function init(){
     const role = sessionStorage.getItem('gbu_role');
     if(role === 'student' && sessionStorage.getItem('gbu_student')){
